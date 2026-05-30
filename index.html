@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Harshit — 3D Reconstruction & Neural Rendering</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f5f3ee;
+      --surface: #ffffff;
+      --ink: #1a1814;
+      --ink-mid: #4a4640;
+      --ink-muted: #8a857d;
+      --accent: #1a3a5c;
+      --accent-light: #e8eef5;
+      --rule: #dedad3;
+      --tag-bg: #eceae4;
+      --tag-text: #4a4640;
+      --link: #1a3a5c;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Lato', sans-serif;
+      font-weight: 300;
+      font-size: 16px;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrapper { max-width: 720px; margin: 0 auto; padding: 0 28px; }
+
+    /* Nav */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(245,243,238,0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--rule);
+    }
+    nav .wrapper {
+      display: flex; align-items: center;
+      justify-content: space-between; height: 56px;
+    }
+    .nav-name { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--ink); }
+    .nav-links { display: flex; gap: 24px; list-style: none; }
+    .nav-links a {
+      font-size: 12px; font-weight: 400; letter-spacing: 0.07em;
+      text-transform: uppercase; color: var(--ink-muted); text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+
+    /* Hero */
+    .hero { padding: 72px 0 56px; animation: fadeUp 0.7s ease both; }
+    .hero-eyebrow {
+      font-family: 'DM Mono', monospace; font-size: 11px;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--ink-muted); margin-bottom: 16px;
+    }
+    .hero h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(38px, 7vw, 56px);
+      font-weight: 400; line-height: 1.08;
+      color: var(--ink); margin-bottom: 8px;
+    }
+    .hero h1 em { font-style: italic; color: var(--accent); }
+    .hero-role { font-size: 14px; color: var(--ink-muted); margin-bottom: 24px; letter-spacing: 0.02em; }
+    .hero-bio {
+      font-size: 15px; color: var(--ink-mid);
+      max-width: 580px; line-height: 1.8; margin-bottom: 28px;
+    }
+    .hero-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      font-size: 12px; font-family: 'DM Mono', monospace;
+      padding: 5px 12px; border-radius: 2px;
+      background: var(--tag-bg); color: var(--tag-text); letter-spacing: 0.04em;
+    }
+    .chip.highlight { background: var(--accent-light); color: var(--accent); }
+
+    /* Section */
+    section {
+      padding: 52px 0; border-top: 1px solid var(--rule);
+      animation: fadeUp 0.7s ease both;
+    }
+    .section-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 32px; }
+    .section-header h2 { font-family: 'DM Serif Display', serif; font-size: 26px; font-weight: 400; }
+    .section-num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-muted); letter-spacing: 0.1em; }
+
+    /* Research cards */
+    .research-grid { display: flex; flex-direction: column; gap: 16px; }
+    .r-card {
+      background: var(--surface); border: 1px solid var(--rule);
+      border-radius: 3px; padding: 22px 24px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .r-card:hover { border-color: #b8c8d8; box-shadow: 0 2px 12px rgba(26,58,92,0.06); }
+    .r-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 8px; }
+    .r-card h3 { font-size: 15px; font-weight: 700; color: var(--ink); line-height: 1.4; }
+    .r-card-links { display: flex; gap: 12px; flex-shrink: 0; }
+    .r-link {
+      font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.05em;
+      color: var(--link); text-decoration: none;
+      border-bottom: 1px solid transparent; transition: border-color 0.2s;
+    }
+    .r-link:hover { border-bottom-color: var(--link); }
+    .r-card p { font-size: 14px; color: var(--ink-mid); line-height: 1.65; margin-bottom: 12px; }
+    .r-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .r-tag {
+      font-family: 'DM Mono', monospace; font-size: 11px;
+      padding: 3px 8px; background: var(--tag-bg); color: var(--tag-text); border-radius: 2px;
+    }
+
+    /* Publications */
+    .pub-list { display: flex; flex-direction: column; }
+    .pub-item {
+      display: grid; grid-template-columns: 52px 1fr;
+      gap: 0 16px; padding: 18px 0; border-bottom: 1px solid var(--rule);
+    }
+    .pub-item:first-child { border-top: 1px solid var(--rule); }
+    .pub-year { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--ink-muted); padding-top: 2px; }
+    .pub-title { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 3px; line-height: 1.45; }
+    .pub-authors { font-size: 13px; color: var(--ink-muted); margin-bottom: 2px; }
+    .pub-venue { font-size: 13px; color: var(--ink-mid); font-style: italic; margin-bottom: 8px; }
+    .pub-actions { display: flex; gap: 14px; }
+    .pub-action {
+      font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.05em;
+      color: var(--link); text-decoration: none;
+      border-bottom: 1px solid transparent; transition: border-color 0.2s;
+    }
+    .pub-action:hover { border-bottom-color: var(--link); }
+    .pub-section-label {
+      font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--ink-muted);
+      margin: 28px 0 4px; padding-bottom: 8px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    /* Talks */
+    .talk-list { display: flex; flex-direction: column; gap: 0; }
+    .talk-item {
+      display: grid; grid-template-columns: 48px 1fr;
+      gap: 0 16px; padding: 14px 0; border-bottom: 1px solid var(--rule);
+      font-size: 14px;
+    }
+    .talk-item:first-child { border-top: 1px solid var(--rule); }
+    .talk-year { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--ink-muted); padding-top: 2px; }
+    .talk-title { color: var(--ink-mid); line-height: 1.55; }
+    .talk-title strong { font-weight: 700; color: var(--ink); }
+
+    /* Code */
+    .code-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+    .code-card {
+      background: var(--surface); border: 1px solid var(--rule);
+      border-radius: 3px; padding: 18px 20px; text-decoration: none; display: block;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .code-card:hover { border-color: #b8c8d8; box-shadow: 0 2px 10px rgba(26,58,92,0.06); }
+    .code-card-name { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--accent); margin-bottom: 6px; }
+    .code-card-desc { font-size: 13px; color: var(--ink-mid); line-height: 1.55; margin-bottom: 12px; }
+    .code-lang { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--ink-muted); }
+    .lang-dot { width: 10px; height: 10px; border-radius: 50%; background: #3572A5; flex-shrink: 0; }
+
+    /* About */
+    .about-body { display: grid; grid-template-columns: 1fr 200px; gap: 40px; align-items: start; }
+    .about-text p { font-size: 15px; color: var(--ink-mid); margin-bottom: 16px; line-height: 1.75; }
+    .about-text p:last-child { margin-bottom: 0; }
+    .about-sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-block h4 {
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--ink-muted); margin-bottom: 8px;
+    }
+    .sidebar-block ul { list-style: none; }
+    .sidebar-block li {
+      font-size: 13px; color: var(--ink-mid);
+      padding: 4px 0; border-bottom: 1px solid var(--rule); line-height: 1.5;
+    }
+    .sidebar-block li:last-child { border-bottom: none; }
+    .cv-download {
+      display: inline-flex; align-items: center; gap: 8px; margin-top: 24px;
+      font-family: 'DM Mono', monospace; font-size: 12px;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--surface); background: var(--accent);
+      padding: 10px 20px; border-radius: 2px; text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .cv-download:hover { opacity: 0.85; }
+
+    /* Awards */
+    .award-list { display: flex; flex-direction: column; gap: 0; }
+    .award-item {
+      display: grid; grid-template-columns: 48px 1fr;
+      gap: 0 16px; padding: 14px 0; border-bottom: 1px solid var(--rule);
+      font-size: 14px; color: var(--ink-mid); line-height: 1.55;
+    }
+    .award-item:first-child { border-top: 1px solid var(--rule); }
+    .award-year { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--ink-muted); padding-top: 2px; }
+
+    /* Contact */
+    .contact-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
+    .contact-link {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--ink-mid); text-decoration: none;
+      padding: 8px 14px; border: 1px solid var(--rule);
+      border-radius: 2px; background: var(--surface);
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .contact-link:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Footer */
+    footer { border-top: 1px solid var(--rule); padding: 28px 0; text-align: center; }
+    footer p { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: var(--ink-muted); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    section:nth-child(1) { animation-delay: 0.05s; }
+    section:nth-child(2) { animation-delay: 0.10s; }
+    section:nth-child(3) { animation-delay: 0.15s; }
+    section:nth-child(4) { animation-delay: 0.20s; }
+
+    @media (max-width: 600px) {
+      .nav-links { gap: 14px; }
+      .nav-links a { font-size: 11px; }
+      .about-body { grid-template-columns: 1fr; }
+      .hero { padding: 48px 0 40px; }
+    }
+  </style>
+</head>
+
+<body>
+
+<nav>
+  <div class="wrapper">
+    <span class="nav-name">Harshit</span>
+    <ul class="nav-links">
+      <li><a href="#research">Research</a></li>
+      <li><a href="#publications">Papers</a></li>
+      <li><a href="#talks">Talks</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main>
+  <div class="wrapper">
+
+    <!-- Hero -->
+    <div class="hero">
+      <p class="hero-eyebrow">Photogrammetry · 3D Reconstruction · Neural Rendering · Digital Twins</p>
+      <h1>From point clouds<br>to <em>living scenes</em></h1>
+      <p class="hero-role">Postdoc Researcher · Audio-Visual Computing Group, IT University of Copenhagen</p>
+      <p class="hero-bio">
+        My work bridges classical multi-view geometry and neural scene representations —
+        building calibrated, geometry-aware pipelines that span photogrammetric point clouds,
+        UAV LiDAR, and dynamic 4D reconstruction using Gaussian Splatting and Neural Radiance Fields.
+        I am driven by a desire to develop immersive, scientifically meaningful digital models
+        that improve our understanding of the physical world, particularly in the context
+        of urban digital twins and their applications to global challenges.
+      </p>
+      <div class="hero-chips">
+        <span class="chip highlight">Open to postdoc &amp; faculty positions</span>
+        <span class="chip">4D Gaussian Splatting</span>
+        <span class="chip">NeRF</span>
+        <span class="chip">SfM / COLMAP</span>
+        <span class="chip">UAV LiDAR</span>
+        <span class="chip">Digital Twins</span>
+        <span class="chip">3D GIS</span>
+      </div>
+    </div>
+
+    <!-- Research -->
+    <section id="research">
+      <div class="section-header">
+        <span class="section-num">01</span>
+        <h2>Research</h2>
+      </div>
+      <div class="research-grid">
+
+        <div class="r-card">
+          <div class="r-card-top">
+            <h3>4D Gaussian Splatting for dynamic scene reconstruction</h3>
+          </div>
+          <p>
+            Developing a 4D Gaussian Splatting framework for spatio-temporal scene reconstruction
+            from synchronized multi-view video. Includes an in-house multi-camera data acquisition
+            setup using GoPro Hero 13 cameras and a calibrated pose-estimation pipeline using COLMAP
+            as a principled alternative to monocular initialization. Current work at ITU Copenhagen.
+          </p>
+          <div class="r-tags">
+            <span class="r-tag">4DGS</span><span class="r-tag">Multi-view Video</span>
+            <span class="r-tag">COLMAP</span><span class="r-tag">Python</span><span class="r-tag">GoPro Hero 13</span>
+          </div>
+        </div>
+
+        <div class="r-card">
+          <div class="r-card-top">
+            <h3>Photogrammetric point clouds for 3D GIS modeling (PhD thesis)</h3>
+            <div class="r-card-links">
+              <a class="r-link" href="#" target="_blank">Thesis ↗</a>
+            </div>
+          </div>
+          <p>
+            Introduced a novel approach for creating 3D GIS models from UAV photogrammetric point clouds,
+            developing pipelines for semantic extraction, LOD3 building reconstruction, and query-based
+            simulation. Integrated UAV imagery, low-cost LiDAR, and open-source photogrammetric tools
+            into scalable geospatial workflows. IIT Roorkee, 2018–2024.
+          </p>
+          <div class="r-tags">
+            <span class="r-tag">UAV LiDAR</span><span class="r-tag">Point Clouds</span>
+            <span class="r-tag">3D GIS</span><span class="r-tag">LOD3</span><span class="r-tag">QGIS</span>
+          </div>
+        </div>
+
+        <div class="r-card">
+          <div class="r-card-top">
+            <h3>Open-source photogrammetry: advancements and benchmarking</h3>
+            <div class="r-card-links">
+              <a class="r-link" href="https://doi.org/10.1007/s12518-023-00529-4" target="_blank">Paper ↗</a>
+            </div>
+          </div>
+          <p>
+            Systematic review and benchmarking of open-source photogrammetric pipelines from a
+            point cloud standpoint — evaluating reconstruction fidelity, scalability, and practical
+            applicability across Pix4D, Metashape, and open-source alternatives for close-range
+            and UAV applications.
+          </p>
+          <div class="r-tags">
+            <span class="r-tag">Metashape</span><span class="r-tag">Pix4D</span>
+            <span class="r-tag">CloudCompare</span><span class="r-tag">Open Source</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Publications -->
+    <section id="publications">
+      <div class="section-header">
+        <span class="section-num">02</span>
+        <h2>Publications</h2>
+      </div>
+
+      <p class="pub-section-label">Journal Articles</p>
+      <div class="pub-list">
+
+        <div class="pub-item">
+          <span class="pub-year">2025</span>
+          <div>
+            <p class="pub-title">How spatiotemporal urban expansion shapes heat trends in coastal megacities: Developed vs. developing nations</p>
+            <p class="pub-authors">Halder, D., Harshit., and Garg, R. D.</p>
+            <p class="pub-venue">Urban Climate, Volume 64, 102704</p>
+            <div class="pub-actions">
+              <a class="pub-action" href="https://doi.org/10.1016/j.uclim.2025.102704" target="_blank">DOI ↗</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="pub-item">
+          <span class="pub-year">2024</span>
+          <div>
+            <p class="pub-title">Low-Cost Data, High-Quality Models: A Semi-Automated Approach to LOD3 Creation</p>
+            <p class="pub-authors">Harshit, Chaurasia, P., Zlatanova, S., &amp; Jain, K.</p>
+            <p class="pub-venue">ISPRS International Journal of Geo-Information, 13(4), 119</p>
+            <div class="pub-actions">
+              <a class="pub-action" href="https://doi.org/10.3390/ijgi13040119" target="_blank">DOI ↗</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="pub-item">
+          <span class="pub-year">2023</span>
+          <div>
+            <p class="pub-title">Advancements in open-source photogrammetry with a point cloud standpoint</p>
+            <p class="pub-authors">Harshit, Jain, K., &amp; Zlatanova, S.</p>
+            <p class="pub-venue">Applied Geomatics, 15(4), 781–794</p>
+            <div class="pub-actions">
+              <a class="pub-action" href="https://doi.org/10.1007/s12518-023-00529-4" target="_blank">DOI ↗</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="pub-item">
+          <span class="pub-year">2021</span>
+          <div>
+            <p class="pub-title">Analysis of Survey Approach Using UAV Images and Lidar for a Chimney Study</p>
+            <p class="pub-authors">Harshit, Jain, K., &amp; Mishra, V.</p>
+            <p class="pub-venue">Journal of the Indian Society of Remote Sensing, 49(3), 613–618</p>
+            <div class="pub-actions">
+              <a class="pub-action" href="https://doi.org/10.1007/s12524-020-01243-z" target="_blank">DOI ↗</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <p class="pub-section-label" style="margin-top:32px;">Selected Conference Papers</p>
+      <div class="pub-list">
+
+        <div class="pub-item">
+          <span class="pub-year">2025</span>
+          <div>
+            <p class="pub-title">3D Local Climate Zone Modeling and Digital Twin Integration for Advanced Climate Resilience using AI</p>
+            <p class="pub-authors">Halder, D., Harshit, H., and Garg, R. D.</p>
+            <p class="pub-venue">12th International Conference on Urban Climate (ICUC12), Rotterdam</p>
+            <div class="pub-actions">
+              <a class="pub-action" href="https://doi.org/10.5194/icuc12-954" target="_blank">DOI ↗</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="pub-item">
+          <span class="pub-year">2023</span>
+          <div>
+            <p class="pub-title">Reconstruction of Architectural Heritage with Symmetrical Components</p>
+            <p class="pub-authors">Harshit, Jain, K., Zlatanova, S., &amp; Halder, D.</p>
+            <p class="pub-venue">ISPRS Annals, Geospatial Week 2023, Cairo</p>
+            <div class="pub-actions">
+              <a class="pub-action" href="https://doi.org/10.5194/isprs-annals-x-1-w1-2023-191-2023" target="_blank">DOI ↗</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="pub-item">
+          <span class="pub-year">2022</span>
+          <div>
+            <p class="pub-title">Geometric Features Interpretation of Photogrammetric Point Cloud from Unmanned Aerial Vehicle</p>
+            <p class="pub-authors">Harshit, Kushwaha, S. K. P., &amp; Jain, K.</p>
+            <p class="pub-venue">ISPRS Annals, 17th 3D GeoInfo, Sydney</p>
+            <div class="pub-actions">
+              <a class="pub-action" href="https://doi.org/10.5194/isprs-annals-x-4-w2-2022-83-2022" target="_blank">DOI ↗</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Talks -->
+    <section id="talks">
+      <div class="section-header">
+        <span class="section-num">03</span>
+        <h2>Talks &amp; Presentations</h2>
+      </div>
+      <div class="talk-list">
+        <div class="talk-item">
+          <span class="talk-year">2026</span>
+          <span class="talk-title"><strong>Photogrammetry to Neural Scene Reconstruction</strong> — IEEE Geolink Lecture Series</span>
+        </div>
+        <div class="talk-item">
+          <span class="talk-year">2025</span>
+          <span class="talk-title"><strong>Decoding 4D Gaussian Splatting</strong> — Audio Visual Computing Group, IT University of Copenhagen, March 2025</span>
+        </div>
+        <div class="talk-item">
+          <span class="talk-year">2024</span>
+          <span class="talk-title"><strong>Understanding Gaussian Splatting</strong> — Khora Virtual Reality, Copenhagen, November 2024</span>
+        </div>
+        <div class="talk-item">
+          <span class="talk-year">2023</span>
+          <span class="talk-title"><strong>Open-Source Photogrammetry for Close Range Applications</strong> — Pre-workshop tutorial, UASG 2023, UKM Malaysia</span>
+        </div>
+        <div class="talk-item">
+          <span class="talk-year">2023</span>
+          <span class="talk-title"><strong>Reconstruction of Architectural Heritage with Symmetrical Components</strong> — Geospatial Week 2023, Cairo, Egypt</span>
+        </div>
+        <div class="talk-item">
+          <span class="talk-year">2023</span>
+          <span class="talk-title"><strong>Open-Source Perspectives of 3D Modeling</strong> — International Workshop on Cultural Heritage Visualization, BUCEA, China</span>
+        </div>
+        <div class="talk-item">
+          <span class="talk-year">2022</span>
+          <span class="talk-title"><strong>Geometric Features Interpretation of Photogrammetric Point Cloud from UAV</strong> — 17th 3D GeoInfo, Sydney, Australia</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- About -->
+    <section id="about">
+      <div class="section-header">
+        <span class="section-num">04</span>
+        <h2>About</h2>
+      </div>
+      <div class="about-body">
+        <div class="about-text">
+          <p>
+            I am a Postdoctoral Researcher at the Audio-Visual Computing Group, IT University of
+            Copenhagen, where I work on 4D Gaussian Splatting and spatio-temporal feature extraction
+            from multi-view video. My research trajectory spans over a decade — from architectural
+            design and UAV photogrammetry through point cloud processing and 3D GIS, to neural
+            rendering and dynamic scene reconstruction.
+          </p>
+          <p>
+            I completed my PhD at IIT Roorkee (2018–2024) on photogrammetric point clouds for 3D GIS
+            modeling, and hold an M.Tech in Geomatics Engineering and a B.Arch from NIT Patna.
+            This unusual combination — architecture, geomatics, and computer vision — grounds my
+            work in geometric and spatial reasoning rather than purely learned representations.
+          </p>
+          <p>
+            I supervise MSc theses at ITU Copenhagen, review for journals including ISPRS and
+            Applied Earth Observation, and have organized and presented at international
+            conferences across Europe, Asia, and Australia. I am actively pursuing postdoctoral
+            and faculty opportunities in computer vision, 3D scene understanding, and neural rendering.
+          </p>
+          <a class="cv-download" href="cv.pdf" target="_blank">↓ Download CV</a>
+        </div>
+        <div class="about-sidebar">
+          <div class="sidebar-block">
+            <h4>Current Position</h4>
+            <ul>
+              <li>Postdoc, ITU Copenhagen</li>
+              <li>Aug 2024 – Present</li>
+            </ul>
+          </div>
+          <div class="sidebar-block">
+            <h4>Education</h4>
+            <ul>
+              <li>PhD — IIT Roorkee (2024)</li>
+              <li>M.Tech Geomatics — IIT Roorkee (2017)</li>
+              <li>B.Arch — NIT Patna (2014)</li>
+            </ul>
+          </div>
+          <div class="sidebar-block">
+            <h4>Tools &amp; Skills</h4>
+            <ul>
+              <li>Python, MATLAB, GEE</li>
+              <li>COLMAP, nerfstudio, gSplat</li>
+              <li>QGIS, ArcGIS, PostGIS</li>
+              <li>Metashape, Pix4D</li>
+              <li>CloudCompare, MeshLab</li>
+              <li>DJI Matrice 300 / Zenmuse L1</li>
+            </ul>
+          </div>
+          <div class="sidebar-block">
+            <h4>Awards</h4>
+            <ul>
+              <li>IEEE GRSS Travel Grant — IGARSS 2024</li>
+              <li>ISPRS Foundation Travel Grant — 2023</li>
+              <li>MDPI Sensors Travel Grant — 2022</li>
+              <li>Best Paper — UASG 2021</li>
+              <li>MHRD PhD Fellowship</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact">
+      <div class="section-header">
+        <span class="section-num">05</span>
+        <h2>Contact</h2>
+      </div>
+      <p style="font-size:15px; color:var(--ink-mid); margin-bottom:20px; max-width:480px;">
+        Open to research collaborations, postdoctoral positions, and academic inquiries.
+      </p>
+      <div class="contact-grid">
+        <a class="contact-link" href="mailto:hano@itu.dk">✉ hano@itu.dk</a>
+        <a class="contact-link" href="mailto:hrshtvrm12@gmail.com">✉ hrshtvrm12@gmail.com</a>
+        <a class="contact-link" href="https://github.com/yourusername" target="_blank">⌥ GitHub</a>
+        <a class="contact-link" href="https://scholar.google.com" target="_blank">◈ Google Scholar</a>
+        <a class="contact-link" href="https://orcid.org/0000-0000-0000-0000" target="_blank">○ ORCID</a>
+        <a class="contact-link" href="https://linkedin.com/in/yourusername" target="_blank">◻ LinkedIn</a>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrapper">
+    <p>Harshit · IT University of Copenhagen · Updated May 2026</p>
+  </div>
+</footer>
+
+</body>
+</html>
