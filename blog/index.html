@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog — Harshit</title>
+  <meta name="description" content="Notes on 3D reconstruction, neural rendering, and open-source photogrammetry — from Harshit, Postdoctoral Researcher at ITU Copenhagen." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/blog.css" />
+</head>
+<body>
+
+<nav>
+  <div class="wrapper">
+    <a href="../index.html" class="nav-name">Harshit</a>
+    <div class="nav-right">
+      <ul class="nav-links" id="navLinks">
+        <li><a href="../index.html#research">Research</a></li>
+        <li><a href="../index.html#publications">Papers</a></li>
+        <li><a href="index.html" class="current">Blog</a></li>
+        <li><a href="../index.html#about">About</a></li>
+        <li><a href="../index.html#contact">Contact</a></li>
+      </ul>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" type="button">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="nav-toggle-btn" id="navToggleBtn" aria-label="Toggle menu" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="wrapper narrow">
+
+    <div class="blog-header reveal">
+      <p class="blog-eyebrow">Notes &amp; Writing</p>
+      <h1>Blog</h1>
+      <p>Occasional write-ups on 3D reconstruction, neural rendering, open-source photogrammetry tooling, and things I learn along the way.</p>
+    </div>
+
+    <div class="post-list reveal-stagger">
+
+      <!--
+        HOW TO ADD A NEW POST
+        1. Duplicate /blog/posts/hello-world.html and rename it, e.g. /blog/posts/my-new-post.html
+        2. Edit its title, date, and body content.
+        3. Copy one .post-card block below, update the href, date, title, excerpt and tags.
+        4. Commit and push — GitHub Pages will serve it automatically.
+      -->
+
+      <a class="post-card stagger-item" href="posts/hello-world.html">
+        <div class="post-meta"><span>Aug 18, 2026</span><span>·</span><span>3 min read</span></div>
+        <h2>Hello, and welcome</h2>
+        <p class="excerpt">Kicking off this blog as a place to write short, informal notes alongside the more formal research on the main site — starting with why, and what to expect here.</p>
+        <div class="post-tags">
+          <span class="post-tag">Meta</span>
+        </div>
+        <span class="post-read">Read post →</span>
+      </a>
+
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrapper">
+    <p>Harshit · IT University of Copenhagen · Updated Aug 2026</p>
+    <a class="back-to-top" href="#top">↑ Back to top</a>
+  </div>
+</footer>
+
+<script src="../assets/blog.js"></script>
+</body>
+</html>

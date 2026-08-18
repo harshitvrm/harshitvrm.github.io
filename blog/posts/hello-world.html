@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hello, and welcome — Harshit</title>
+  <meta name="description" content="Kicking off the blog: why it exists and what to expect." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/blog.css" />
+</head>
+<body>
+
+<nav>
+  <div class="wrapper">
+    <a href="../../index.html" class="nav-name">Harshit</a>
+    <div class="nav-right">
+      <ul class="nav-links" id="navLinks">
+        <li><a href="../../index.html#research">Research</a></li>
+        <li><a href="../../index.html#publications">Papers</a></li>
+        <li><a href="../index.html" class="current">Blog</a></li>
+        <li><a href="../../index.html#about">About</a></li>
+        <li><a href="../../index.html#contact">Contact</a></li>
+      </ul>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" type="button">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="nav-toggle-btn" id="navToggleBtn" aria-label="Toggle menu" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="wrapper narrow">
+    <article class="post reveal">
+      <div class="post-title-block">
+        <div class="post-meta"><span>Aug 18, 2026</span><span>·</span><span>3 min read</span><span>·</span><span class="post-tag">Meta</span></div>
+        <h1>Hello, and welcome</h1>
+      </div>
+
+      <div class="post-body">
+        <p>
+          This is the first post on this blog — mostly a placeholder to show how new posts should
+          look and be structured. Replace this text with your own introduction: why you're writing,
+          what kind of posts to expect (research notes, tool write-ups, conference recaps, code
+          walkthroughs), and how often you plan to post.
+        </p>
+
+        <h2>What this blog is for</h2>
+        <p>
+          Use this space for things that don't belong in a formal publication — a debugging story,
+          a benchmark you ran out of curiosity, notes from a conference, or a walkthrough of a tool
+          in your pipeline. Keep entries short; a few paragraphs is plenty.
+        </p>
+
+        <h3>A code block, for reference</h3>
+        <p>Fenced code blocks render like this — useful for command snippets or short scripts:</p>
+        <pre><code>colmap feature_extractor \
+  --database_path db.db \
+  --image_path images/
+
+colmap exhaustive_matcher \
+  --database_path db.db</code></pre>
+
+        <h3>A blockquote, for reference</h3>
+        <blockquote>
+          Pull quotes or citations from papers/talks can go here.
+        </blockquote>
+
+        <p>
+          When you're ready to write a real post: duplicate this file, update the title and date in
+          both the <code>&lt;title&gt;</code> tag and the post header, replace this body text, and
+          add a matching entry to <a href="../index.html">the blog index</a>.
+        </p>
+      </div>
+
+      <div class="post-footer-nav">
+        <a href="../index.html">← Back to all posts</a>
+        <a href="#top">↑ Back to top</a>
+      </div>
+    </article>
+  </div>
+</main>
+
+<footer>
+  <div class="wrapper">
+    <p>Harshit · IT University of Copenhagen · Updated Aug 2026</p>
+    <a class="back-to-top" href="#top">↑ Back to top</a>
+  </div>
+</footer>
+
+<script src="../../assets/blog.js"></script>
+</body>
+</html>
