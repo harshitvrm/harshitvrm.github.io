@@ -67,6 +67,7 @@
     }
 
     .wrapper { max-width: 760px; margin: 0 auto; padding: 0 28px; position: relative; }
+    .wrapper.wide { max-width: 1120px; }
 
     a { color: inherit; }
 
@@ -216,8 +217,8 @@
       padding: 4px 10px; border-radius: 100px; backdrop-filter: blur(4px);
       border: 1px solid var(--rule);
     }
-    @media (min-width: 860px) {
-      .hero-grid { grid-template-columns: 1.2fr 0.95fr; gap: 44px; align-items: center; }
+    @media (min-width: 900px) {
+      .hero-grid { grid-template-columns: 1.2fr 0.95fr; gap: 48px; align-items: center; }
       .hero-visual { margin-bottom: 0; aspect-ratio: 1 / 1; }
     }
 
@@ -474,7 +475,7 @@
 </nav>
 
 <main id="top">
-  <div class="wrapper">
+  <div class="wrapper wide">
 
     <!-- Hero -->
     <div class="hero reveal">
@@ -508,7 +509,9 @@
         </div>
       </div>
     </div>
+  </div>
 
+  <div class="wrapper">
     <div class="stats-strip reveal">
       <div class="stat"><div class="stat-num">10+</div><div class="stat-label">Publications</div></div>
       <div class="stat"><div class="stat-num">7</div><div class="stat-label">Invited Talks</div></div>
