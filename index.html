@@ -76,11 +76,22 @@
     }
     .bg-accent span {
       position: absolute; border-radius: 50%; filter: blur(60px);
-      opacity: 0.7; transition: opacity 0.3s ease;
+      opacity: 0.7; transition: opacity 0.3s ease, transform 0.6s cubic-bezier(0.16,1,0.3,1);
+      will-change: transform;
     }
     .bg-accent .a1 { width: 480px; height: 480px; background: var(--grad-a); top: -180px; right: -140px; }
     .bg-accent .a2 { width: 380px; height: 380px; background: var(--grad-b); top: 420px; left: -160px; }
     .bg-accent .a3 { width: 320px; height: 320px; background: var(--grad-a); bottom: -100px; right: -100px; }
+
+    /* Film-grain texture for depth */
+    .grain {
+      position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      opacity: 0.035; mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 180px 180px;
+      transition: opacity 0.3s ease;
+    }
+    html[data-theme="dark"] .grain { opacity: 0.07; mix-blend-mode: soft-light; }
 
     /* Nav */
     nav {
@@ -188,6 +199,28 @@
       font-weight: 500;
     }
 
+    /* Hero layout: text + generative visual */
+    .hero-grid { display: grid; grid-template-columns: 1fr; gap: 8px; align-items: center; }
+    .hero-visual {
+      position: relative; aspect-ratio: 16 / 10; border-radius: 12px;
+      border: 1px solid var(--rule); background: var(--surface);
+      overflow: hidden; margin-bottom: 36px;
+      box-shadow: 0 16px 40px var(--shadow);
+    }
+    .hero-visual canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    .hero-visual-label {
+      position: absolute; bottom: 12px; left: 14px; z-index: 2;
+      font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--ink-muted);
+      background: color-mix(in srgb, var(--surface) 72%, transparent);
+      padding: 4px 10px; border-radius: 100px; backdrop-filter: blur(4px);
+      border: 1px solid var(--rule);
+    }
+    @media (min-width: 860px) {
+      .hero-grid { grid-template-columns: 1.2fr 0.95fr; gap: 44px; align-items: center; }
+      .hero-visual { margin-bottom: 0; aspect-ratio: 1 / 1; }
+    }
+
     /* Stats strip */
     .stats-strip {
       display: grid; grid-template-columns: repeat(4, 1fr);
@@ -210,12 +243,18 @@
     section {
       padding: 56px 0; border-top: 1px solid var(--rule);
     }
-    .section-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 34px; }
-    .section-header h2 { font-family: 'DM Serif Display', serif; font-size: 27px; font-weight: 400; }
+    .section-header { display: flex; align-items: center; gap: 14px; margin-bottom: 34px; }
+    .section-header h2 { font-family: 'DM Serif Display', serif; font-size: 27px; font-weight: 400; letter-spacing: -0.005em; }
     .section-num {
       font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-muted); letter-spacing: 0.1em;
       border: 1px solid var(--rule); border-radius: 100px; padding: 3px 9px;
     }
+    .section-icon {
+      display: flex; align-items: center; justify-content: center;
+      width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%;
+      background: var(--accent-2-light); color: var(--accent-2);
+    }
+    .section-icon svg { width: 16px; height: 16px; }
     .section-lead {
       font-size: 14px; color: var(--ink-muted); margin-top: -18px; margin-bottom: 30px; max-width: 520px;
     }
@@ -409,6 +448,7 @@
 
 <div class="progress-bar" id="progressBar"></div>
 <div class="bg-accent"><span class="a1"></span><span class="a2"></span><span class="a3"></span></div>
+<div class="grain"></div>
 
 <nav>
   <div class="wrapper">
@@ -438,26 +478,34 @@
 
     <!-- Hero -->
     <div class="hero reveal">
-      <p class="hero-eyebrow"><span class="dot"></span>Photogrammetry · 3D Reconstruction · Neural Rendering · Digital Twins</p>
-      <h1>From point clouds<br>to <em>living scenes</em> through geometry</h1>
-      <p class="hero-role">Postdoc Researcher · <strong>Audio-Visual Computing Group</strong>, IT University of Copenhagen</p>
-      <p class="hero-bio">
-        My work bridges classical multi-view geometry and neural scene representations —
-        building calibrated, geometry-aware pipelines that span photogrammetric point clouds,
-        UAV LiDAR, and dynamic 4D reconstruction using Gaussian Splatting and Neural Radiance Fields.
-        I am driven by a desire to develop immersive, scientifically meaningful digital models
-        that improve our understanding of the physical world, particularly in the context
-        of urban digital twins and their applications to global challenges.
-      </p>
-      <div class="hero-chips">
-        <span class="chip highlight">● Open to postdoc &amp; faculty positions</span>
-        <span class="chip">Visual Computing</span>
-        <span class="chip">4D Gaussian Splatting</span>
-        <span class="chip">NeRF + gSplat</span>
-        <span class="chip">SfM / COLMAP</span>
-        <span class="chip">UAV + LiDAR</span>
-        <span class="chip">Digital Twins</span>
-        <span class="chip">3D GIS</span>
+      <div class="hero-grid">
+        <div class="hero-text">
+          <p class="hero-eyebrow"><span class="dot"></span>Photogrammetry · 3D Reconstruction · Neural Rendering · Digital Twins</p>
+          <h1>From point clouds<br>to <em>living scenes</em> through geometry</h1>
+          <p class="hero-role">Postdoc Researcher · <strong>Audio-Visual Computing Group</strong>, IT University of Copenhagen</p>
+          <p class="hero-bio">
+            My work bridges classical multi-view geometry and neural scene representations —
+            building calibrated, geometry-aware pipelines that span photogrammetric point clouds,
+            UAV LiDAR, and dynamic 4D reconstruction using Gaussian Splatting and Neural Radiance Fields.
+            I am driven by a desire to develop immersive, scientifically meaningful digital models
+            that improve our understanding of the physical world, particularly in the context
+            of urban digital twins and their applications to global challenges.
+          </p>
+          <div class="hero-chips">
+            <span class="chip highlight">● Open to postdoc &amp; faculty positions</span>
+            <span class="chip">Visual Computing</span>
+            <span class="chip">4D Gaussian Splatting</span>
+            <span class="chip">NeRF + gSplat</span>
+            <span class="chip">SfM / COLMAP</span>
+            <span class="chip">UAV + LiDAR</span>
+            <span class="chip">Digital Twins</span>
+            <span class="chip">3D GIS</span>
+          </div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <canvas id="heroCanvas"></canvas>
+          <span class="hero-visual-label">Point cloud, rendered live</span>
+        </div>
       </div>
     </div>
 
@@ -471,6 +519,7 @@
     <!-- Research -->
     <section id="research">
       <div class="section-header reveal">
+        <span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.73z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></span>
         <span class="section-num">01</span>
         <h2>Research</h2>
       </div>
@@ -551,6 +600,7 @@
     <!-- Publications -->
     <section id="publications">
       <div class="section-header reveal">
+        <span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
         <span class="section-num">02</span>
         <h2>Publications</h2>
       </div>
@@ -748,6 +798,7 @@
     <!-- Talks -->
     <section id="talks">
       <div class="section-header reveal">
+        <span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></span>
         <span class="section-num">03</span>
         <h2>Talks &amp; Presentations</h2>
       </div>
@@ -797,6 +848,7 @@
     <!-- About -->
     <section id="about">
       <div class="section-header reveal">
+        <span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
         <span class="section-num">04</span>
         <h2>About</h2>
       </div>
@@ -867,6 +919,7 @@
     <!-- Contact -->
     <section id="contact">
       <div class="section-header reveal">
+        <span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
         <span class="section-num">05</span>
         <h2>Contact</h2>
       </div>
@@ -961,6 +1014,127 @@
       const scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
       bar.style.width = scrolled + '%';
     }, { passive: true });
+  })();
+
+  // Ambient blob parallax (desktop pointer only, respects reduced motion)
+  (function () {
+    const accents = document.querySelectorAll('.bg-accent span');
+    const fine = window.matchMedia('(pointer: fine)').matches;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!accents.length || !fine || reduceMotion) return;
+    window.addEventListener('mousemove', function (e) {
+      const x = (e.clientX / window.innerWidth - 0.5);
+      const y = (e.clientY / window.innerHeight - 0.5);
+      accents.forEach(function (el, i) {
+        const depth = (i + 1) * 12;
+        el.style.transform = 'translate3d(' + (x * depth).toFixed(1) + 'px,' + (y * depth).toFixed(1) + 'px,0)';
+      });
+    }, { passive: true });
+  })();
+
+  // Hero visual: generative point-cloud / network canvas
+  (function () {
+    const canvas = document.getElementById('heroCanvas');
+    if (!canvas || !canvas.getContext) return;
+    const ctx = canvas.getContext('2d');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let particles = [], W = 0, H = 0, DPR = 1, raf = null;
+
+    function cssVar(name, fallback) {
+      const v = getComputedStyle(document.documentElement).getPropertyValue(name);
+      return v ? v.trim() : fallback;
+    }
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      DPR = Math.min(window.devicePixelRatio || 1, 2);
+      W = canvas.width = Math.max(1, Math.round(rect.width * DPR));
+      H = canvas.height = Math.max(1, Math.round(rect.height * DPR));
+    }
+
+    function initParticles() {
+      let count = Math.round((W * H) / (16000 * DPR * DPR));
+      count = Math.max(26, Math.min(70, count));
+      particles = [];
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          vx: (Math.random() - 0.5) * 0.3 * DPR,
+          vy: (Math.random() - 0.5) * 0.3 * DPR,
+          r: (Math.random() * 1.3 + 0.7) * DPR
+        });
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      const dot = cssVar('--accent-2', '#a9793f');
+      const line = cssVar('--accent', '#1a3a5c');
+      const maxDist = 120 * DPR;
+
+      if (!reduceMotion) {
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          p.x += p.vx; p.y += p.vy;
+          if (p.x <= 0 || p.x >= W) p.vx *= -1;
+          if (p.y <= 0 || p.y >= H) p.vy *= -1;
+          p.x = Math.max(0, Math.min(W, p.x));
+          p.y = Math.max(0, Math.min(H, p.y));
+        }
+      }
+
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const a = particles[i], b = particles[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < maxDist) {
+            ctx.globalAlpha = (1 - dist / maxDist) * 0.32;
+            ctx.strokeStyle = line;
+            ctx.lineWidth = 0.6 * DPR;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      ctx.globalAlpha = 0.9;
+      ctx.fillStyle = dot;
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    function loop() {
+      draw();
+      if (!reduceMotion) raf = requestAnimationFrame(loop);
+    }
+
+    function start() {
+      resize();
+      initParticles();
+      if (reduceMotion) { draw(); return; }
+      if (raf) cancelAnimationFrame(raf);
+      loop();
+    }
+
+    let resizeTimer;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () { resize(); initParticles(); }, 150);
+    }, { passive: true });
+
+    const themeBtn = document.getElementById('themeToggle');
+    if (themeBtn) themeBtn.addEventListener('click', function () { setTimeout(draw, 60); });
+
+    start();
   })();
 </script>
 
