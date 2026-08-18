@@ -203,7 +203,7 @@
     /* Hero layout: text + generative visual */
     .hero-grid { display: grid; grid-template-columns: 1fr; gap: 8px; align-items: center; }
     .hero-visual {
-      position: relative; aspect-ratio: 16 / 10; border-radius: 12px;
+      position: relative; aspect-ratio: 16 / 9; border-radius: 12px;
       border: 1px solid var(--rule); background: var(--surface);
       overflow: hidden; margin-bottom: 36px;
       box-shadow: 0 16px 40px var(--shadow);
@@ -505,7 +505,7 @@
         </div>
         <div class="hero-visual" aria-hidden="true">
           <canvas id="heroCanvas"></canvas>
-          <span class="hero-visual-label">Point cloud, rendered live</span>
+          <span class="hero-visual-label">Point cloud live</span>
         </div>
       </div>
     </div>
