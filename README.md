@@ -4,7 +4,7 @@
   
   [Harshit](https://www.linkedin.com/in/harshit-phd-b3180747/) is currently a postdoc researcher at [IT University of Copenhagen, Denmark](https://en.itu.dk/). 
   
-  He is employed in the XTREME project "[Extended Reality Environment for Immersive Experience of Art and Music](https://pure.itu.dk/da/projects/extended-reality-environment-for-immersive-experience-of-art-and-/)" and is a valued member of [Audio–Visual Computing](https://avc.itu.dk/) Group at the Department of Computer Science, Data Science Section. 
+  He is employed in the XTREME project "[Extended Reality Environment for Immersive Experience of Art and Music](https://pure.itu.dk/da/projects/extended-reality-environment-for-immersive-experience-of-art-and-/)" and is a valued member of [Audio–Visual Computing](https://avc.itu.dk/) Group at the Department of Computer Science, Data Science Section. He is also affliated with affiliated with the [Pioneer Centre for AI](https://www.aicentre.dk/) and [Maritime Hub (mHub)](https://mhub.itu.dk/People).
   
   [XTREME](https://xtremeitu.dk/) is a project financed by the EU Horizon Europe program. Partnering with 14 organizations across Europe, led by the IT University Copenhagen, the project explores innovative alternatives to traditional ways of accessing cultural experiences. 
   
