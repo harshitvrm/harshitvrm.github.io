@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decoding Spatial AI from First Principles</title>
+<meta name="description" content="From pixels and laser returns to world models and intelligent digital twins: a first-principles account of spatial AI, written from a photogrammetry and geomatics perspective.">
+<meta property="og:title" content="Decoding Spatial AI from First Principles">
+<meta property="og:description" content="From pixels and laser returns to world models and intelligent digital twins.">
+<meta property="og:type" content="article">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false});"></script>
+
+<style>
+:root {
+  --color-bg: #f3f2f2;
+  --color-surface: #eae9e9;
+  --color-text: #201f1d;
+  --color-accent: #b68235;
+  --color-divider: color-mix(in srgb, #201f1d 16%, transparent);
+  --color-neutral-100: #f8f4f4;
+  --color-neutral-300: #d7d3d3;
+  --color-neutral-500: #9b9797;
+  --color-neutral-600: #7d7979;
+  --color-neutral-800: #444141;
+  --color-accent-100: #fff3e4;
+  --color-accent-700: #7d5411;
+  --color-accent-800: #5a3b0a;
+  --font-heading: "Cormorant Garamond", Georgia, serif;
+  --font-heading-weight: 600;
+  --font-body: "Lora", Georgia, serif;
+  --space-1: 4.6px; --space-2: 9.2px; --space-3: 13.8px; --space-4: 18.4px;
+  --radius-md: 4px;
+  --shadow-sm: 0 1px 2px color-mix(in srgb, #2d2b2b 14%, transparent);
+  --muted: color-mix(in srgb, var(--color-text) 60%, transparent);
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--color-bg); color: var(--color-text);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.6; font-weight: 400;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
+  line-height: 1.12; letter-spacing: -0.015em; margin: 0 0 var(--space-2);
+}
+h1 { font-size: 56px; font-weight: 400; letter-spacing: -0.02em; }
+h2 { font-size: 32px; margin-bottom: var(--space-3); }
+h5 { font-size: 19px; margin-top: 28px; }
+h6 { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+p { margin: 0 0 var(--space-3); }
+a { color: var(--color-accent-700); text-underline-offset: 3px; }
+a:hover { color: var(--color-accent); }
+::selection { background: color-mix(in srgb, var(--color-accent) 30%, transparent); }
+:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+.page { max-width: 900px; margin: 0 auto; padding: 64px 32px 96px; }
+.col { text-align: justify; hyphens: auto; }
+.kicker { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-accent-700); font-weight: 600; }
+.standfirst { font-size: 19px; font-family: var(--font-heading); opacity: 0.85; max-width: 720px; margin-bottom: 20px; }
+.meta { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; font-size: 13px; opacity: 0.65; }
+.hr { height: 1px; border: 0; margin: var(--space-4) 0; background: var(--color-divider); }
+section { margin: 40px 0; }
+
+.stat-num { font-family: var(--font-heading); font-weight: 400; font-variant-numeric: tabular-nums; font-size: 30px; line-height: 1.1; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.card {
+  display: flex; flex-direction: column; gap: var(--space-2);
+  padding: var(--space-3); border-radius: var(--radius-md); border: 1px solid var(--color-divider);
+}
+.card-body { margin: 0; font-size: 13px; opacity: 0.8; flex: 1; }
+
+.toc { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 32px; margin: 0; padding: 0; list-style: none; font-size: 14px; }
+.toc a { color: inherit; text-decoration: none; }
+.toc a:hover { color: var(--color-accent); }
+.toc span { font-family: var(--font-heading); color: var(--color-accent-700); margin-right: 8px; }
+
+.table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 16px 0 20px; }
+.table th {
+  text-align: left; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;
+  color: var(--muted); padding: var(--space-2); border-bottom: 1px solid var(--color-divider);
+}
+.table td { padding: var(--space-2); border-bottom: 1px solid var(--color-divider); vertical-align: top; }
+.table tbody tr:hover { background: color-mix(in srgb, var(--color-text) 4%, transparent); }
+.table-wrap { overflow-x: auto; }
+
+.math { margin: 18px 0; overflow-x: auto; }
+.pullquote {
+  margin: 28px 0; padding: 4px 0 4px 20px; border-left: 2px solid var(--color-accent);
+  font-family: var(--font-heading); font-size: 22px; line-height: 1.35;
+}
+
+ol.stages { padding-left: 0; list-style: none; counter-reset: st; margin: 20px 0; }
+ol.stages > li { counter-increment: st; position: relative; padding: 12px 0 12px 56px; border-bottom: 1px solid var(--color-divider); }
+ol.stages > li::before {
+  content: counter(st, decimal-leading-zero); position: absolute; left: 0; top: 8px;
+  font-family: var(--font-heading); font-size: 26px; color: var(--color-accent);
+}
+ol.stages strong { font-family: var(--font-heading); font-size: 19px; font-weight: 600; display: block; margin-bottom: 2px; }
+ol.stages .out { display: block; font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+ol.stages .out::before { content: "Hands on \2192\00a0"; color: var(--color-accent-700); letter-spacing: 0.06em; font-size: 10.5px; text-transform: uppercase; }
+
+figure.fig {
+  margin: 32px 0; padding: 16px 18px 12px; background: var(--color-neutral-100);
+  border: 6px solid var(--color-surface); outline: 1px solid var(--color-divider);
+}
+figure.fig svg { display: block; width: 100%; height: auto; }
+figcaption { font-size: 12.5px; margin-top: 10px; color: var(--muted); }
+figcaption b { color: var(--color-accent-700); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; font-size: 10.5px; margin-right: 6px; }
+
+svg.d text { font-family: var(--font-body); fill: var(--color-text); font-size: 13px; }
+svg.d .ttl { font-family: var(--font-heading); font-size: 19px; font-weight: 600; }
+svg.d .nm { font-weight: 600; }
+svg.d .q { fill: var(--color-neutral-600); font-size: 11.5px; }
+svg.d .ln { fill: none; stroke: var(--color-neutral-500); stroke-width: 1.25; }
+svg.d .bx { fill: none; stroke: var(--color-neutral-500); stroke-width: 1.25; }
+svg.d .acc { fill: color-mix(in srgb, var(--color-accent) 14%, transparent); stroke: var(--color-accent); stroke-width: 2; }
+svg.d .tint { fill: var(--color-surface); stroke: var(--color-neutral-500); stroke-width: 1.25; }
+svg.d .aln { fill: none; stroke: var(--color-accent); stroke-width: 1.6; }
+svg.d .grid { stroke: var(--color-neutral-300); }
+
+sup.src { font-size: 10px; color: var(--color-accent-700); }
+sup.src a { text-decoration: none; }
+.sources { font-size: 12.5px; line-height: 1.7; opacity: 0.85; padding-left: 20px; }
+footer { margin-top: 48px; font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; }
+footer a { color: inherit; }
+
+@media (max-width: 720px) {
+  .page { padding: 40px 20px 64px; }
+  h1 { font-size: 40px; }
+  h2 { font-size: 27px; }
+  .grid-4 { grid-template-columns: 1fr 1fr; }
+  .toc { grid-template-columns: 1fr; }
+  .col { text-align: left; }
+  figure.fig { padding: 10px; }
+}
+@media print {
+  body { background: #fff; }
+  figure.fig { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<div class="page" id="top">
+
+  <!-- Masthead -->
+  <header style="margin-bottom:48px;">
+    <div class="kicker" style="margin-bottom:14px;">Research Blog · Spatial AI &amp; Geomatics</div>
+    <h1 style="margin-bottom:16px; max-width:820px;">Decoding Spatial AI from First Principles</h1>
+    <p class="col standfirst">From pixels and laser returns to world models and intelligent digital twins: how a machine comes to know where things are, and why every layer of that knowledge inherits the errors of the layer beneath it.</p>
+    <div class="meta">
+      <span>November 2026</span><span>·</span><span>~3,400 words</span><span>·</span><span>5 figures</span>
+    </div>
+  </header>
+
+  <hr class="hr">
+
+  <!-- Headline numbers -->
+  <section style="margin:40px 0 48px;">
+    <h6 style="margin-bottom:16px; opacity:0.6;">Numbers worth remembering</h6>
+    <div class="grid-4">
+      <div class="card">
+        <div class="stat-num">6</div>
+        <p class="card-body">Questions any spatial understanding must answer about an object: what, where, what shape, which way, what is around it, how it can move.</p>
+      </div>
+      <div class="card">
+        <div class="stat-num">σ<sub style="font-size:16px;">Z</sub> ∝ Z²</div>
+        <p class="card-body">Stereo depth error grows with the square of distance: double the range, quadruple the uncertainty.</p>
+      </div>
+      <div class="card">
+        <div class="stat-num">15 cm</div>
+        <p class="card-body">LiDAR range error from just one nanosecond of timing error, since light covers about 30 cm per nanosecond.</p>
+      </div>
+      <div class="card">
+        <div class="stat-num">17 cm</div>
+        <p class="card-body">How far a point 20 m away moves when a single camera-to-body rotation is off by 0.5°.</p>
+      </div>
+    </div>
+  </section>
+
+  <section style="margin:0 0 40px;">
+    <h6 style="margin-bottom:12px; opacity:0.6;">Contents</h6>
+    <ul class="toc">
+      <li><a href="#s-space"><span>1</span>What it means to understand space</a></li>
+      <li><a href="#s-depth"><span>2</span>How a machine measures depth</a></li>
+      <li><a href="#s-levels"><span>3</span>From measurements to understanding</a></li>
+      <li><a href="#s-repr"><span>4</span>Choosing a representation</a></li>
+      <li><a href="#s-build"><span>5</span>Building a spatial AI system</a></li>
+      <li><a href="#s-twin"><span>6</span>Spatial AI is not the digital twin</a></li>
+      <li><a href="#s-open"><span>7</span>Open problems</a></li>
+      <li><a href="#s-takeaway"><span>8</span>The takeaway</a></li>
+    </ul>
+  </section>
+
+  <hr class="hr">
+
+  <!-- Lede -->
+  <section>
+    <p class="col">Spatial AI is the attempt to give a computer what a person has the moment they walk into a room: a working model of where things are, what shape they have, how they relate, and how they can move. Recognising a chair in a photograph is not that. Knowing the chair is 80&nbsp;cm tall, stands at (2.5, 1.0, 4.2)&nbsp;m in the room's frame, is rotated 30°, and sits 50&nbsp;cm from the table is.</p>
+    <p class="col">That gap, between <em>recognising</em> something and <em>locating it in the physical world</em>, is what this post is about. I come to it from photogrammetry and geomatics, where a measurement is only as good as its reference frame and its error budget. My argument is simple: spatial AI is built in layers, and each layer inherits the guarantees, and the errors, of the one below it. Get the geometry wrong and no amount of semantics, graphs or language models will rescue the digital twin built on top.</p>
+    <p class="col">The post moves bottom-up: what it means to understand space, how machines measure it, how measurements become understanding, which representation to choose, how to engineer the system, and where spatial AI ends and the digital twin begins.</p>
+  </section>
+
+  <!-- 1 -->
+  <section id="s-space">
+    <h2>1. What it means to understand space</h2>
+    <p class="col">Understanding space means answering six questions about every object, continuously, as the scene changes. A person does this without effort; a machine needs a separate capability for each.</p>
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>Question</th><th>Capability</th><th>What the machine must estimate</th></tr></thead>
+      <tbody>
+        <tr><td>What is it?</td><td>Recognition</td><td>Class and instance identity</td></tr>
+        <tr><td>Where is it?</td><td>Localisation</td><td>Position in a known frame, in metres</td></tr>
+        <tr><td>What shape is it?</td><td>Geometry</td><td>Surfaces, extent, volume</td></tr>
+        <tr><td>How is it oriented?</td><td>Pose</td><td>Rotation relative to the frame</td></tr>
+        <tr><td>What is around it?</td><td>Relations</td><td>Adjacency, containment, connectivity</td></tr>
+        <tr><td>How can it move?</td><td>Dynamics</td><td>Motion, constraints, collisions</td></tr>
+      </tbody>
+    </table></div>
+    <p class="col">A photograph answers the first question well and the rest poorly. It holds two spatial dimensions, pixel column and row. The world has three, and the third, depth, is exactly what projection throws away. Most of spatial AI is the work of getting it back.</p>
+
+    <h5>Everything starts with a reference frame</h5>
+    <p class="col">A point in space is three numbers, \(P = (x, y, z)\). But those numbers mean nothing until you say <em>relative to what</em>. A single scene typically carries four frames at once: <strong>sensor frames</strong> (relative to a camera centre or a LiDAR head), the <strong>body frame</strong> of the rigid platform carrying the sensors, an <strong>object frame</strong> so an object's shape stays stable when it moves, and the shared <strong>world frame</strong>, site or geodetic, in which everything must agree.</p>
+    <p class="col">Moving a point between frames is a rigid-body transform, a rotation \(R\) followed by a translation \(t\):</p>
+    <div class="math">\[ P_{world} = R\,P_{camera} + t \]</div>
+    <p class="col">In practice we chain these as 4&nbsp;×&nbsp;4 homogeneous matrices, so a whole sensor-to-world path is a single product:</p>
+    <div class="math">\[ T = \begin{bmatrix} R &amp; t \\ \mathbf{0}^\top &amp; 1 \end{bmatrix}, \qquad T_{world \leftarrow camera} = T_{world \leftarrow body}\; T_{body \leftarrow camera} \]</div>
+
+    <figure class="fig">
+      <svg class="d" viewBox="0 0 760 320" role="img" aria-label="Every point reaches the world frame through a chain of estimates">
+        <defs><marker id="ar1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#7d7979"/></marker></defs>
+        <text class="ttl" x="24" y="36">Every point reaches the world frame through a chain of estimates</text>
+        <path class="ln" d="M192 96L300 128" marker-end="url(#ar1)"/>
+        <path class="ln" d="M192 184L300 152" marker-end="url(#ar1)"/>
+        <path class="ln" d="M468 140H560" marker-end="url(#ar1)"/>
+        <path class="ln" d="M644 212V168" marker-end="url(#ar1)"/>
+        <text class="q" x="246" y="100" text-anchor="middle">T(B←C)</text>
+        <text class="q" x="246" y="190" text-anchor="middle">T(B←L)</text>
+        <text class="q" x="514" y="132" text-anchor="middle">T(W←B)</text>
+        <text class="q" x="654" y="194">T(W←O)</text>
+        <rect class="bx" x="24" y="68" width="168" height="56" rx="6"/>
+        <text class="nm" x="108" y="92" text-anchor="middle">Camera frame</text><text class="q" x="108" y="110" text-anchor="middle">image rays</text>
+        <rect class="bx" x="24" y="156" width="168" height="56" rx="6"/>
+        <text class="nm" x="108" y="180" text-anchor="middle">LiDAR frame</text><text class="q" x="108" y="198" text-anchor="middle">range returns</text>
+        <rect class="bx" x="300" y="112" width="168" height="56" rx="6"/>
+        <text class="nm" x="384" y="136" text-anchor="middle">Body frame</text><text class="q" x="384" y="154" text-anchor="middle">the rigid sensor rig</text>
+        <rect class="acc" x="560" y="112" width="168" height="56" rx="6"/>
+        <text class="nm" x="644" y="136" text-anchor="middle">World frame</text><text class="q" x="644" y="154" text-anchor="middle">site or geodetic datum</text>
+        <rect class="bx" x="560" y="212" width="168" height="56" rx="6"/>
+        <text class="nm" x="644" y="236" text-anchor="middle">Object frame</text><text class="q" x="644" y="254" text-anchor="middle">its own origin</text>
+        <text class="q" x="24" y="302">Each arrow is an estimate with its own error, and errors compound along the chain.</text>
+      </svg>
+      <figcaption><b>Figure 1</b>Calibration fixes the sensor-to-body links once; the body-to-world link is re-estimated at every instant from SLAM, GNSS and IMU.</figcaption>
+    </figure>
+
+    <p class="col">This is not bookkeeping. Every transform in that chain is itself an <em>estimate</em> with an uncertainty, and the errors compound. A 0.5° error in a camera-to-body rotation displaces a point 20&nbsp;m away by about 17&nbsp;cm. A digital twin whose frames disagree will place the right machine in the wrong spot, and it will do so confidently.</p>
+  </section>
+
+  <!-- 2 -->
+  <section id="s-depth">
+    <h2>2. How a machine measures depth</h2>
+    <p class="col">A machine has no sense of depth; it must either <em>measure</em> range directly or <em>triangulate</em> it from more than one view. Everything else is inference, and inference should be labelled as such.</p>
+
+    <h5>The camera throws depth away</h5>
+    <p class="col">A pinhole camera maps a 3D point to a 2D pixel. In photogrammetry this is the collinearity condition: the point, the projection centre and the image point lie on one ray. Written as a projection:</p>
+    <div class="math">\[ \lambda \begin{bmatrix} u \\ v \\ 1 \end{bmatrix} = K\,[\,R \mid t\,] \begin{bmatrix} X \\ Y \\ Z \\ 1 \end{bmatrix} \]</div>
+    <p class="col">\(K\) holds the intrinsics (focal length, principal point, distortion); \([R \mid t]\) is the camera's pose. The scale factor \(\lambda\) is the depth, and it cancels. Every point along the ray lands on the same pixel. That is why a single image is mathematically ill-posed for metric reconstruction: monocular depth networks do not recover depth, they <em>predict</em> a plausible one from learned priors. Useful, often impressive, but a different epistemic object from a measurement.</p>
+
+    <figure class="fig">
+      <svg class="d" viewBox="0 0 760 364" role="img" aria-label="One image fixes a ray; a second view fixes the point">
+        <text class="ttl" x="24" y="30">One image fixes a ray; a second view fixes the point</text>
+        <line class="grid" x1="380" y1="48" x2="380" y2="348"/>
+        <text class="nm" x="190" y="66" text-anchor="middle">One camera</text>
+        <line class="ln" x1="168" y1="240" x2="228" y2="240"/>
+        <line class="ln" x1="180" y1="268" x2="234" y2="187"/>
+        <line class="ln" x1="234" y1="187" x2="306" y2="79" stroke-dasharray="4 4"/>
+        <circle cx="198.7" cy="240" r="3.2" fill="#b68235"/>
+        <circle cx="234" cy="187" r="5" fill="none" stroke="#7d7979" stroke-width="1.25"/>
+        <circle cx="264" cy="142" r="5" fill="none" stroke="#7d7979" stroke-width="1.25"/>
+        <circle cx="294" cy="97" r="5" fill="none" stroke="#7d7979" stroke-width="1.25"/>
+        <text class="q" x="246" y="191" style="font-size:13px">?</text>
+        <text class="q" x="276" y="146" style="font-size:13px">?</text>
+        <text class="q" x="306" y="101" style="font-size:13px">?</text>
+        <text class="q" x="162" y="236" text-anchor="end">same pixel</text>
+        <polygon points="168,284 192,284 180,268" fill="none" stroke="#201f1d" stroke-width="1.25"/><circle cx="180" cy="268" r="2.5" fill="#201f1d"/>
+        <text class="q" x="190" y="340" text-anchor="middle">One view: depth along the ray is unknown</text>
+
+        <text class="nm" x="550" y="66" text-anchor="middle">Two cameras (stereo)</text>
+        <line class="ln" x1="456" y1="240" x2="516" y2="240"/>
+        <line class="ln" x1="590" y1="240" x2="650" y2="240"/>
+        <line class="ln" x1="470" y1="268" x2="560" y2="110"/>
+        <line class="ln" x1="630" y1="268" x2="560" y2="110"/>
+        <circle cx="486" cy="240" r="3.2" fill="#b68235"/>
+        <circle cx="617.6" cy="240" r="3.2" fill="#b68235"/>
+        <circle cx="560" cy="110" r="6" fill="#b68235"/>
+        <text class="nm" x="548" y="104" text-anchor="end">P</text>
+        <line class="grid" x1="568" y1="110" x2="704" y2="110" stroke-dasharray="4 4"/>
+        <line class="ln" x1="700" y1="110" x2="700" y2="268"/>
+        <line class="ln" x1="694" y1="110" x2="706" y2="110"/>
+        <line class="ln" x1="694" y1="268" x2="706" y2="268"/>
+        <text class="nm" x="712" y="194">Z</text>
+        <polygon points="458,284 482,284 470,268" fill="none" stroke="#201f1d" stroke-width="1.25"/><circle cx="470" cy="268" r="2.5" fill="#201f1d"/>
+        <polygon points="618,284 642,284 630,268" fill="none" stroke="#201f1d" stroke-width="1.25"/><circle cx="630" cy="268" r="2.5" fill="#201f1d"/>
+        <line class="ln" x1="470" y1="296" x2="630" y2="296"/>
+        <line class="ln" x1="470" y1="290" x2="470" y2="302"/>
+        <line class="ln" x1="630" y1="290" x2="630" y2="302"/>
+        <text class="nm" x="550" y="316" text-anchor="middle">B</text>
+        <text class="q" x="550" y="340" text-anchor="middle">Two views: the rays meet, so Z = f·B / d</text>
+      </svg>
+      <figcaption><b>Figure 2</b>With one view, depth along the ray is a free parameter. A second view a baseline B away closes the triangle and fixes Z.</figcaption>
+    </figure>
+
+    <h5>Stereo and multi-view: triangulation</h5>
+    <p class="col">Two cameras a known baseline \(B\) apart see the same point at slightly different image positions. That shift is the disparity \(d\), and for a rectified pair:</p>
+    <div class="math">\[ Z = \frac{f\,B}{d} \]</div>
+    <p class="col">Differentiate it and you get the result every capture engineer should know by heart:</p>
+    <div class="math">\[ \sigma_Z \approx \frac{Z^2}{f\,B}\,\sigma_d \]</div>
+    <p class="col">Depth error grows with the <em>square</em> of distance. Doubling range quadruples uncertainty; doubling the baseline halves it. Multi-view reconstruction generalises this: structure-from-motion and bundle adjustment solve jointly for every camera pose and every 3D point, so that each point is constrained by many rays rather than two.</p>
+
+    <h5>LiDAR: measuring range directly</h5>
+    <p class="col">LiDAR emits a laser pulse and times its return:</p>
+    <div class="math">\[ d = \frac{c\,t}{2} \]</div>
+    <p class="col">Light covers about 30&nbsp;cm per nanosecond, so 1&nbsp;ns of timing error is 15&nbsp;cm of range error. The output is a point cloud: millions of \((x, y, z)\) samples, often with intensity and, after colourisation, RGB. LiDAR gives metric geometry without needing texture, which is where cameras are weakest, but it gives no semantics and sparse sampling at range.</p>
+
+    <h5>Sensor fusion: no single sensor is enough</h5>
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>Sensor</th><th>Gives</th><th>Weak at</th></tr></thead>
+      <tbody>
+        <tr><td>RGB camera</td><td>Appearance, texture, semantics</td><td>Metric depth from one view</td></tr>
+        <tr><td>LiDAR</td><td>Direct metric range, geometry</td><td>Colour, semantics, sparse at range</td></tr>
+        <tr><td>GNSS</td><td>Absolute geographic position</td><td>Indoors, urban canyons, orientation</td></tr>
+        <tr><td>IMU</td><td>Acceleration and angular rate at high rate</td><td>Drifts without correction</td></tr>
+      </tbody>
+    </table></div>
+    <p class="col">Fusion is the work of putting these into one frame and one clock, then reconciling them with their uncertainties. The camera says <em>what</em> the object is, LiDAR says <em>where its surfaces are</em>, GNSS anchors the result to the Earth, and the IMU carries the platform's pose between observations. The result is better than any input, but only if calibration (<a href="#s-build">Section 5</a>, stage 2) is right.</p>
+  </section>
+
+  <!-- 3 -->
+  <section id="s-levels">
+    <h2>3. From measurements to understanding</h2>
+    <p class="col">Fifty million registered points of a factory floor are a measurement, not an understanding. The machine knows where every point is, but not which points are a press, which are a wall, which conveyor feeds which machine, or whether anything moved since yesterday. Understanding is built in four levels, each consuming the output of the one below.</p>
+
+    <figure class="fig">
+      <svg class="d" viewBox="0 0 760 428" role="img" aria-label="Understanding is built in four levels, each on the last">
+        <defs><marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#7d7979"/></marker></defs>
+        <text class="ttl" x="24" y="36">Understanding is built in four levels, each on the last</text>
+        <path class="ln" d="M380 116V132" marker-end="url(#ar3)"/>
+        <path class="ln" d="M380 188V204" marker-end="url(#ar3)"/>
+        <path class="ln" d="M380 260V276" marker-end="url(#ar3)"/>
+        <path class="ln" d="M380 332V348" marker-end="url(#ar3)"/>
+        <rect class="tint" x="24" y="60" width="712" height="56" rx="6"/>
+        <text class="nm" x="40" y="92">Raw measurement</text><text x="264" y="92">Where are the samples?</text><text class="q" x="480" y="92">50 million (x, y, z) points</text>
+        <rect class="bx" x="24" y="132" width="712" height="56" rx="6"/>
+        <text class="nm" x="40" y="164">Level 1 · Geometric</text><text x="264" y="164">What shape is here?</text><text class="q" x="480" y="164">Planes, cylinders, edges, extents</text>
+        <rect class="bx" x="24" y="204" width="712" height="56" rx="6"/>
+        <text class="nm" x="40" y="236">Level 2 · Semantic</text><text x="264" y="236">What is it?</text><text class="q" x="480" y="236">Wall, pipe; Machine 1 vs Machine 2</text>
+        <rect class="bx" x="24" y="276" width="712" height="56" rx="6"/>
+        <text class="nm" x="40" y="308">Level 3 · Relational</text><text x="264" y="308">How do things connect?</text><text class="q" x="480" y="308">Machine B → Conveyor C → Storage D</text>
+        <rect class="bx" x="24" y="348" width="712" height="56" rx="6"/>
+        <text class="nm" x="40" y="380">Level 4 · Temporal</text><text x="264" y="380">What is changing?</text><text class="q" x="480" y="380">Same robot: at A at T1, at B at T3</text>
+      </svg>
+      <figcaption><b>Figure 3</b>Each row hands its output down to the next, so an error in an upper row reaches every row below it.</figcaption>
+    </figure>
+
+    <h5>Level 1 — Geometric: what shape is here?</h5>
+    <p class="col">The system extracts structure from raw samples: planes, edges, corners, cylinders, volumes and object boundaries, each with a length, width, height and orientation. Classical methods (RANSAC plane fitting, region growing, primitive fitting) still do much of this work well, and they come with interpretable residuals.</p>
+
+    <h5>Level 2 — Semantic: what is it?</h5>
+    <p class="col">The system assigns meaning to geometry: this vertical plane is a wall, that horizontal one a floor, this cylinder a pipe. Two distinctions matter. <strong>Semantic segmentation</strong> labels every point with a class (“machine”). <strong>Instance segmentation</strong> separates individuals within a class (“Machine 1” vs “Machine 2”). A digital twin needs instances, because maintenance records attach to <em>a</em> machine, not to the category.</p>
+    <p class="col">Typical learners operate directly on 3D data: PointNet and PointNet++, sparse 3D convolutional networks, and point or 3D vision transformers. All of them learn from labelled 3D data, which is expensive, and all of them generalise less well than their benchmark numbers suggest.</p>
+
+    <h5>Level 3 — Relational: how do things connect?</h5>
+    <p class="col">Objects become nodes and relations become edges: <em>next to</em>, <em>connected to</em>, <em>transports to</em>, <em>located inside</em>. The result is a 3D scene graph. It answers questions geometry alone cannot: which machines feed production line 2, which assets sit in a given room, which pipes join two processing units, what is blocking an access route.</p>
+
+    <figure class="fig">
+      <svg class="d" viewBox="0 0 760 272" role="img" aria-label="A scene graph turns positions into answerable questions">
+        <defs><marker id="ar4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#b68235"/></marker></defs>
+        <text class="ttl" x="24" y="34">A scene graph turns positions into answerable questions</text>
+        <rect class="tint" x="24" y="52" width="712" height="144" rx="6"/>
+        <text class="nm" x="40" y="78">Factory building E</text>
+        <text class="q" x="720" y="78" text-anchor="end">nesting = located inside</text>
+        <line class="ln" x1="152" y1="150" x2="229" y2="150"/>
+        <line class="aln" x1="341" y1="150" x2="418" y2="150"/>
+        <line class="aln" x1="530" y1="150" x2="607" y2="150" marker-end="url(#ar4)"/>
+        <text class="q" x="190" y="114" text-anchor="middle">next to</text>
+        <text class="q" x="380" y="114" text-anchor="middle">connected to</text>
+        <text class="q" x="569" y="114" text-anchor="middle">transports to</text>
+        <rect x="40" y="126" width="112" height="48" rx="6" fill="#f8f4f4" stroke="#9b9797" stroke-width="1.25"/><text class="nm" x="96" y="154" text-anchor="middle">Machine A</text>
+        <rect x="229" y="126" width="112" height="48" rx="6" fill="#f8f4f4" stroke="#9b9797" stroke-width="1.25"/><text class="nm" x="285" y="154" text-anchor="middle">Machine B</text>
+        <rect x="418" y="126" width="112" height="48" rx="6" fill="#f8f4f4" stroke="#9b9797" stroke-width="1.25"/><text class="nm" x="474" y="154" text-anchor="middle">Conveyor C</text>
+        <rect x="607" y="126" width="112" height="48" rx="6" fill="#f8f4f4" stroke="#9b9797" stroke-width="1.25"/><text class="nm" x="663" y="154" text-anchor="middle">Storage D</text>
+        <text x="24" y="230">Query: which machines feed Storage D?</text>
+        <text class="q" x="24" y="252">Walk the edges back: Storage D ← Conveyor C ← Machine B. Machine A is adjacent, not connected.</text>
+      </svg>
+      <figcaption><b>Figure 4</b>Containment is drawn as nesting and relations as labelled edges; a question about material flow becomes a walk along the edges.</figcaption>
+    </figure>
+
+    <p class="col">This is the step from understanding objects to understanding the <em>structure</em> of an environment.</p>
+
+    <h5>Level 4 — Temporal and physical: what is changing?</h5>
+    <p class="col">The world moves. A robot leaves position A at time T1 and arrives at B by T3; the system must keep it as <em>the same robot</em> throughout. That needs persistent identities, tracking, and a model of what change is normal.</p>
+    <p class="col">It also needs humility about what a change is. A machine can look different because the lighting changed or the sensor is noisy, while nothing physical moved. Separating visual change from physical change takes repeated observations and explicit uncertainty, not a single frame difference. This is where 4D reconstruction stops being a rendering problem and becomes a measurement problem.</p>
+    <p class="col">The robotics literature describes the same progression: from purely metric maps, to metric-semantic maps, to metric-semantic-topological representations that carry objects, places and their relations.<sup class="src"><a href="#r1">[1]</a></sup></p>
+  </section>
+
+  <!-- 4 -->
+  <section id="s-repr">
+    <h2>4. Choosing a representation</h2>
+    <p class="col">The representations of a reconstructed scene are not interchangeable: pick the one whose guarantees match the question the twin must answer. A model that looks right is not the same as a model that measures right.</p>
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>Representation</th><th>What it stores</th><th>Good for</th><th>Watch out for</th></tr></thead>
+      <tbody>
+        <tr><td>Point cloud</td><td>Sampled 3D surface points</td><td>Surveying, deviation checks, metric analysis</td><td>No surfaces or topology; uneven density</td></tr>
+        <tr><td>Mesh</td><td>Vertices and connected faces</td><td>Rendering, CAD/BIM exchange, physics</td><td>Meshing smooths or invents surfaces in gaps</td></tr>
+        <tr><td>Voxel / occupancy grid</td><td>Space divided into cells</td><td>Navigation, collision checks, free-space reasoning</td><td>Memory grows fast; resolution is fixed</td></tr>
+        <tr><td>Neural fields (NeRF)</td><td>A network mapping position and view to colour and density</td><td>Photoreal novel views</td><td>Geometry is implicit; extraction is lossy</td></tr>
+        <tr><td>3D / 4D Gaussian splatting</td><td>Explicit anisotropic Gaussians, optionally time-varying</td><td>Fast photoreal rendering, dynamic scenes</td><td>Optimised for appearance; metric accuracy must be verified</td></tr>
+      </tbody>
+    </table></div>
+    <p class="col">The tension worth naming is in the last two rows. Neural rendering optimises photometric error, so it rewards images that <em>look</em> right from the training views. It does not, by itself, guarantee that a wall is planar, a pipe is the right diameter, or two scans agree in scale. For a twin that will be measured or simulated, I would treat neural representations as a visual layer registered to a metrically validated geometric core, and evaluate their geometry explicitly against survey-grade reference data rather than by PSNR alone.</p>
+  </section>
+
+  <!-- 5 -->
+  <section id="s-build">
+    <h2>5. Building a spatial AI system: ten stages</h2>
+    <p class="col">Building a spatial AI system for a digital twin is a ten-stage pipeline, and most failures trace back to the first four. Here it is for an industrial facility, each stage with what it must hand on.</p>
+    <ol class="stages">
+      <li><strong>Define the spatial problem</strong>Fix the scale (object, room, building, site, city), the required geometric accuracy, the object classes and relations to capture, whether the scene is static or dynamic, the update rate, and the decisions the twin must support. A layout twin may need a scan a quarter; a twin that tracks autonomous robots needs continuous, low-latency perception.<span class="out">a spatial requirements specification</span></li>
+      <li><strong>Design the sensing architecture</strong>Choose RGB and RGB-D cameras, LiDAR, GNSS, IMUs, drones and IoT sensors against those requirements. Then calibrate: <em>intrinsic</em> calibration for each sensor's internal model, <em>extrinsic</em> calibration for each sensor's pose relative to the others, and time synchronisation across all of them. A misaligned camera paints LiDAR points with the wrong colours, and that error propagates everywhere downstream.<span class="out">a sensor layout, calibration specification and acquisition plan</span></li>
+      <li><strong>Collect and prepare data</strong>Capture images, depth maps, point clouds, poses, GNSS, IMU and metadata; remove invalid returns and outliers; synchronise clocks; transform into a common frame; register overlapping scans (ICP for local refinement, SLAM or bundle adjustment at scale); separate static from moving content where needed.<span class="out">a clean, aligned, time-synchronised dataset</span></li>
+      <li><strong>Reconstruct the geometry</strong>Produce the representation chosen in Section 4 and validate it against independent control, such as surveyed targets or check distances.<span class="out">a 3D model with a stated accuracy</span></li>
+      <li><strong>Train perception models</strong>Label classes and instances; select architectures (PointNet++, sparse convolution and point transformers for 3D; CNNs or ViTs for images; 3D detectors; trackers); train on split train, validation and test data. Evaluate precision and recall, segmentation accuracy, 3D box and pose error, and robustness to lighting and to unseen sites. A model that works in one factory can fail in the next.<span class="out">a perception system that identifies and localises the relevant objects</span></li>
+      <li><strong>Build the world model</strong>Give every object a persistent record (ID, class, pose, dimensions, location, connections, state, last observation) and link the records into a spatial knowledge graph. Natural-language queries can then be translated into graph queries, which is far more reliable than asking a language model to infer relations from raw points.<span class="out">a persistent, queryable, semantic world model</span></li>
+      <li><strong>Integrate time and physics</strong>Attach live operational data (temperature, vibration, pressure, power, controller state) to the right object, and add behaviour models where the application needs them: heat transfer, fluid flow, mechanics, material movement.<span class="out">a spatially grounded, operationally connected model</span></li>
+      <li><strong>Assemble the twin</strong>Combine geometry, semantics, relations, live data, history and physical models behind <em>one</em> identity scheme, so the machine in the 3D model, the maintenance system and the sensor network is the same machine.<span class="out">the digital twin platform</span></li>
+      <li><strong>Add reasoning and simulation</strong>Spatial queries (clearances, safety zones, obstructed routes), predictive analytics (failure risk, drifting vibration), what-if simulation (a stopped machine, +20% throughput, a moved conveyor), and conversational interfaces. The language model interprets and orchestrates; measurements and facts come from the spatial and sensor systems.<span class="out">decision support</span></li>
+      <li><strong>Deploy, monitor and improve</strong>Split work between edge (low-latency perception near sensors), cloud (training, storage, analytics) or both. Monitor sensor health, data quality, model accuracy, spatial drift, latency, tracking failures and access control. The twin must know when its picture of the world has gone stale, and say so.<span class="out">an operating system that degrades visibly, not silently</span></li>
+    </ol>
+
+    <h5>Tools that commonly appear</h5>
+    <p class="col">No project needs all of these; the stage and scale decide.</p>
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>Layer</th><th>Typical tools</th></tr></thead>
+      <tbody>
+        <tr><td>Capture and robotics</td><td>ROS 2, NVIDIA Isaac, MQTT for IoT messaging</td></tr>
+        <tr><td>Reconstruction</td><td>COLMAP, Open3D, PCL, OpenCV</td></tr>
+        <tr><td>Learning</td><td>Python, PyTorch</td></tr>
+        <tr><td>Scene description and exchange</td><td>OpenUSD, IFC (BIM), OGC 3D Tiles</td></tr>
+        <tr><td>Storage</td><td>PostGIS (spatial), Neo4j (graphs), time-series databases</td></tr>
+        <tr><td>Visualisation</td><td>Unreal Engine, Unity</td></tr>
+      </tbody>
+    </table></div>
+
+    <h5>Start small and complete</h5>
+    <p class="col">Do not start with the whole factory. Start with one room or one production line, and take it through every stage. A six-month pilot might run: requirements and capture (month 1), reconstruction and registration (2), perception (3), world model (4), twin integration (5), queries, anomaly detection and evaluation (6). The goal is a prototype that reconstructs a real space, recognises selected objects, tracks change and answers spatial questions, before anything is scaled up.</p>
+  </section>
+
+  <!-- 6 -->
+  <section id="s-twin">
+    <h2>6. Spatial AI is not the digital twin</h2>
+    <p class="col">A digital twin is a <em>representation</em> of the physical world; spatial AI is the <em>intelligence</em> that builds and interprets it. The two are often used interchangeably, and the confusion leads to twins that display a lot and understand little.</p>
+
+    <figure class="fig">
+      <svg class="d" viewBox="0 0 760 548" role="img" aria-label="Spatial AI and the digital twin meet in the world model">
+        <defs><marker id="ar6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#7d7979"/></marker></defs>
+        <text class="ttl" x="24" y="36">Spatial AI and the digital twin meet in the world model</text>
+        <path class="ln" d="M280 120V144" marker-end="url(#ar6)"/>
+        <path class="ln" d="M280 200V224" marker-end="url(#ar6)"/>
+        <path class="ln" d="M280 280V304" marker-end="url(#ar6)"/>
+        <path class="ln" d="M280 360V384" marker-end="url(#ar6)"/>
+        <path class="ln" d="M280 440V464" marker-end="url(#ar6)"/>
+        <path class="ln" d="M56 492H40V92H56" marker-end="url(#ar6)"/>
+        <text class="q" x="30" y="292" text-anchor="middle" transform="rotate(-90 30 292)">decisions and control</text>
+        <rect class="bx" x="56" y="64" width="448" height="56" rx="6"/>
+        <text class="nm" x="280" y="88" text-anchor="middle">Physical environment</text><text class="q" x="280" y="106" text-anchor="middle">Machines, conveyors, rooms, people, vehicles</text>
+        <rect class="bx" x="56" y="144" width="448" height="56" rx="6"/>
+        <text class="nm" x="280" y="168" text-anchor="middle">Sensing and acquisition</text><text class="q" x="280" y="186" text-anchor="middle">Cameras, LiDAR, GNSS, IMU, IoT: calibrated and time-synced</text>
+        <rect class="bx" x="56" y="224" width="448" height="56" rx="6"/>
+        <text class="nm" x="280" y="248" text-anchor="middle">Spatial perception</text><text class="q" x="280" y="266" text-anchor="middle">Registration, reconstruction, segmentation, tracking</text>
+        <rect class="acc" x="56" y="304" width="448" height="56" rx="6"/>
+        <text class="nm" x="280" y="328" text-anchor="middle">Spatial world model</text><text x="280" y="346" text-anchor="middle" style="font-size:11.5px">Identities, poses, geometry, relations, state, uncertainty</text>
+        <rect class="bx" x="56" y="384" width="448" height="56" rx="6"/>
+        <text class="nm" x="280" y="408" text-anchor="middle">Digital twin platform</text><text class="q" x="280" y="426" text-anchor="middle">3D scene, graph and time-series stores, live data, simulation</text>
+        <rect class="bx" x="56" y="464" width="448" height="56" rx="6"/>
+        <text class="nm" x="280" y="488" text-anchor="middle">Applications</text><text class="q" x="280" y="506" text-anchor="middle">Spatial queries, prediction, what-if scenarios, decision support</text>
+        <path class="aln" d="M520 224H528V360H520"/>
+        <text class="nm" x="538" y="288">Spatial AI</text><text class="q" x="538" y="304">interprets</text>
+        <path fill="none" stroke="#7d7979" stroke-width="1.5" d="M616 304H624V520H616"/>
+        <text class="nm" x="634" y="408">Digital twin</text><text class="q" x="634" y="424">persists</text>
+      </svg>
+      <figcaption><b>Figure 5</b>Spatial AI writes to the world model from below; the twin builds on it from above, and decisions taken in the twin change the physical world again.</figcaption>
+    </figure>
+
+    <p class="col">The two meet in the world model. Spatial AI writes to it from below, turning observations into identities, poses and relations; the twin builds on it from above, adding live data, history, simulation and interfaces. Decisions taken in the twin then change the physical world, and the loop starts again.</p>
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>Capability</th><th>Digital twin</th><th>Spatial AI</th></tr></thead>
+      <tbody>
+        <tr><td>3D representation</td><td>Holds and displays it</td><td>Builds it from sensor data</td></tr>
+        <tr><td>Object identity</td><td>Stores it, often from external sources</td><td>Infers and maintains it</td></tr>
+        <tr><td>Spatial relations</td><td>Stores them</td><td>Infers and reasons about them</td></tr>
+        <tr><td>Movement</td><td>Displays it</td><td>Perceives and interprets it</td></tr>
+        <tr><td>Change</td><td>Records it</td><td>Detects and classifies it</td></tr>
+        <tr><td>Prediction</td><td>Hosts predictive models</td><td>Supplies the spatial context they need</td></tr>
+      </tbody>
+    </table></div>
+    <p class="col">One design rule follows: every object must carry the same identity in the 3D model, the operational database, the maintenance system and the sensor network. Without it, a machine can be drawn in exactly the right place and wired to exactly the wrong sensor readings.</p>
+  </section>
+
+  <!-- 7 -->
+  <section id="s-open">
+    <h2>7. Open problems, from a measurement perspective</h2>
+    <p class="col">The hard problems in spatial AI are less about recognising more classes and more about knowing how much to trust what the system believes. Five stand out to me.</p>
+    <p class="col"><strong>Metric evaluation of neural reconstruction.</strong> Photometric scores such as PSNR, SSIM and LPIPS say how good a rendering looks, not whether its geometry is right. We need geometry-specific metrics, reported against independent ground truth, as routinely as we report image quality.</p>
+    <p class="col"><strong>Uncertainty that survives the pipeline.</strong> Calibration, registration, segmentation and tracking each carry error, yet most systems pass on point estimates. A twin should be able to say “this machine is at (12.5, 4.2)&nbsp;m ± 3&nbsp;cm” and know where the 3&nbsp;cm came from.</p>
+    <p class="col"><strong>Dynamic scenes as measurement, not just view synthesis.</strong> 4D methods can render moving scenes convincingly. Recovering metrically consistent, time-resolved geometry, with multi-view constraints rather than monocular priors, is still open.</p>
+    <p class="col"><strong>Persistent identity under change.</strong> Keeping “Machine 3” as Machine 3 across occlusions, relocations, refits and seasons is what turns a sequence of scans into a history.</p>
+    <p class="col"><strong>Generalisation and labelling cost.</strong> 3D labels are expensive and site-specific. Models that transfer across facilities, sensors and lighting, or that need far fewer labels, would change the economics of every twin.</p>
+    <p class="pullquote">Underneath all five is one question: what can this system <em>measure</em>, and what is it <em>guessing</em>?</p>
+    <p class="col">Making that boundary explicit, in the data model and in the interface, is the single most useful thing a spatial AI system can do for the people who rely on it.</p>
+  </section>
+
+  <!-- 8 -->
+  <section id="s-takeaway">
+    <h2>8. The takeaway</h2>
+    <p class="col">Spatial AI is five capabilities stacked on one another, and each is only as trustworthy as the one beneath it:</p>
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>Capability</th><th>What it means</th></tr></thead>
+      <tbody>
+        <tr><td>1 · Perception</td><td>Measure the world in 3D, in a known frame, with known error</td></tr>
+        <tr><td>2 · Understanding</td><td>Identify objects, their properties and their relations</td></tr>
+        <tr><td>3 · Representation</td><td>Keep a persistent, structured model of the environment</td></tr>
+        <tr><td>4 · Reasoning</td><td>Interpret change, explain situations, predict outcomes</td></tr>
+        <tr><td>5 · Action</td><td>Use that understanding to simulate, optimise and eventually control</td></tr>
+      </tbody>
+    </table></div>
+    <p class="col">A 3D reconstruction tells you what a place looks like. A spatial AI system tells you what is in it, where, how it connects, what is changing, and what that means. The interesting transition, and the one I think research should hold to the highest standard, is the move from the first to the second without losing metric truth on the way.</p>
+  </section>
+
+  <hr class="hr">
+
+  <!-- Further reading -->
+  <section style="margin-top:40px;">
+    <h5 style="opacity:0.6; margin:0 0 16px;">Further reading</h5>
+    <ol class="sources">
+      <li id="r1">“Scene Representations for Robotic Spatial Perception.” <em>Annual Review of Control, Robotics, and Autonomous Systems</em>. A review of geometric, semantic and topological scene representations. <a href="https://doi.org/10.1146/annurev-control-040423-030709" target="_blank" rel="noopener">doi.org</a></li>
+      <li id="r2">DIDYMOS-XR, Deliverable D3.1: “Capture, reconstruction, synchronisation and scene understanding methods.” EU project report on 3D capture, scene understanding and twin synchronisation. <a href="https://didymos-xr.eu/wp-content/uploads/2025/01/D3.1-Capture-reconstruction-synchronisation-and-scene-understanding-methods.pdf" target="_blank" rel="noopener">didymos-xr.eu</a></li>
+      <li id="r3">“Spatial Intelligence Handbook: Digital Twins.” An overview of high-fidelity twin construction and supporting technologies. <a href="https://spatial-agi.github.io/read/11.1/" target="_blank" rel="noopener">spatial-agi.github.io</a></li>
+    </ol>
+  </section>
+
+  <footer>
+    <span>Decoding Spatial AI from First Principles · November 2026</span>
+    <a href="#top">Back to top ↑</a>
+  </footer>
+
+</div>
+</body>
+</html>
